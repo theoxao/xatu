@@ -17,8 +17,6 @@ class FileBeanLoader(beanInjector: BeanInjector, private val applicationContext:
 
     init {
         inject()
-        val script = applicationContext.getBean("Script1") as Script
-        script.invokeMethod("testBean", null)
     }
 
     override fun beanClass(): Class<*> {
