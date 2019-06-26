@@ -5,6 +5,7 @@ import com.theoxao.base.persist.model.RouteScript
 import com.theoxao.base.route.RouteCacheService
 import com.theoxao.base.script.GroovyScriptService
 import com.theoxao.base.script.ScriptParamNameDiscoverer
+import com.theoxao.base.script.ast.AutowiredASTTransform.Companion.AUTOWIRE_BEAN_SUFFIX
 import com.theoxao.configuration.handlerParam
 import io.ktor.application.call
 import io.ktor.http.HttpMethod
@@ -18,6 +19,8 @@ import io.ktor.util.KtorExperimentalAPI
 import io.ktor.util.pipeline.ContextDsl
 import kotlinx.coroutines.future.await
 import org.slf4j.LoggerFactory
+import org.springframework.beans.BeansException
+import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.support.DefaultTransactionDefinition
@@ -35,6 +38,7 @@ class DefaultRouteHandler(
     private val applicationEngine: ApplicationEngine,
     private val scriptService: GroovyScriptService,
     private val routeCacheService: RouteCacheService,
+    private val applicationContext: ApplicationContext,
     private val transactionManager: PlatformTransactionManager
 ) : RouteHandler {
 
@@ -53,8 +57,21 @@ class DefaultRouteHandler(
         routeCacheService.routeCache[routeScript.id] = routeScript
         applicationEngine.application.routing {
             markedRoute(routeScript.uri, HttpMethod(routeScript.requestMethod), routeScript.id) {
+                val script = scriptService.parse(routeScript.content)
+                //autowire beans  FIXME should be annotation driven
+                script.metaClass.properties.forEach {
+                    if (it.name.endsWith(AUTOWIRE_BEAN_SUFFIX)) {
+                        val type = it.type
+                        try {
+                            val bean = applicationContext.getBean(it.name.removeSuffix(AUTOWIRE_BEAN_SUFFIX))
+                            if (bean.javaClass.isAssignableFrom(type)) {
+                                script.metaClass.setProperty(script, it.name.removeSuffix(AUTOWIRE_BEAN_SUFFIX), bean)
+                            }
+                        } catch (ignore: BeansException) {
+                        }
+                    }
+                }
                 handle {
-                    val script = scriptService.parse(routeScript.content)
                     //TODO temporary solution
                     val ts = transactionManager.getTransaction(DefaultTransactionDefinition())
                     var result: Any? = null
