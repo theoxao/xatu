@@ -41,22 +41,14 @@ class AutowiredASTTransform : ASTTransformation {
             }
             val ve = de.variableExpression
             val variableName = ve.name
-            val fieldNode =
-                FieldNode(variableName, ve.modifiers, ve.type, null, de.rightExpression)
-            fieldNode.setSourcePosition(de)
-            cNode.addProperty(PropertyNode(fieldNode, ve.modifiers, null, null))
+//            val fieldNode =
+//                FieldNode(variableName, ve.modifiers, ve.type, null, de.rightExpression)
+//            fieldNode.setSourcePosition(de)
+//            cNode.addProperty(PropertyNode(fieldNode, ve.modifiers, null, null))
+//            fieldNode.setSourcePosition(de)
             val autowireNode =
                 FieldNode("$variableName$AUTOWIRE_BEAN_SUFFIX", ve.modifiers, ve.type, null, de.rightExpression)
-            fieldNode.setSourcePosition(de)
             cNode.addProperty(PropertyNode(autowireNode, ve.modifiers, null, null))
-
-            val annotations = de.annotations
-            for (annotation in annotations) {
-                val annotationClassNode = annotation.classNode
-                if (notTransform(annotationClassNode) || acceptableTransform(annotation)) {
-                    fieldNode.addAnnotation(annotation)
-                }
-            }
         }
     }
 

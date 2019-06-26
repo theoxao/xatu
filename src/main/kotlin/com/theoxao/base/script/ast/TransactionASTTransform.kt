@@ -28,14 +28,13 @@ open class TransactionASTTransform : ASTTransformation {
         }
         val annotationNode = nodes[0]
         val parent = nodes[1]
-        val ast = source.ast
-        ast.addImport("PlatformTransactionManager", ClassHelper.make(PlatformTransactionManager::class.java))
-        val ve =
-            VariableExpression("platformTransactionManager", ClassHelper.make(PlatformTransactionManager::class.java))
-        val de = DeclarationExpression(ve, Token.NULL, EmptyExpression())
-        val es = ExpressionStatement(de)
-        ast.addStatement(es)
-        println(source.source.reader.readText())
+        val fieldNode = FieldNode(
+            "PlatformTransactionManager",
+            0,
+            ClassHelper.make(PlatformTransactionManager::class.java),
+            null,
+            null
+        )
     }
 
 }
