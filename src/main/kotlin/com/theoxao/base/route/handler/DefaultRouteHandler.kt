@@ -17,7 +17,10 @@ import io.ktor.util.Attributes
 import io.ktor.util.KtorExperimentalAPI
 import io.ktor.util.pipeline.ContextDsl
 import kotlinx.coroutines.future.await
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.support.DefaultTransactionDefinition
 import java.util.concurrent.CompletableFuture
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.jvm.javaField
@@ -31,9 +34,11 @@ import kotlin.reflect.jvm.javaField
 class DefaultRouteHandler(
     private val applicationEngine: ApplicationEngine,
     private val scriptService: GroovyScriptService,
-    private val routeCacheService: RouteCacheService
+    private val routeCacheService: RouteCacheService,
+    private val transactionManager: PlatformTransactionManager
 ) : RouteHandler {
 
+    private val log = LoggerFactory.getLogger(this::class.java.name)
     private var baseRoute: Routing? = null
 
     init {
@@ -50,13 +55,22 @@ class DefaultRouteHandler(
             markedRoute(routeScript.uri, HttpMethod(routeScript.requestMethod), routeScript.id) {
                 handle {
                     val script = scriptService.parse(routeScript.content)
-                    val result: Any? = script.invokeMethod(
-                        routeScript.methodName,
-                        handlerParam(
-                            script.metaClass.theClass.methods.find { it.name == routeScript.methodName }!!,
-                            ScriptParamNameDiscoverer(routeScript.content)
-                        ).params.map { it.value }.toTypedArray()
-                    )
+                    //TODO temporary solution
+                    val ts = transactionManager.getTransaction(DefaultTransactionDefinition())
+                    var result: Any? = null
+                    try {
+                        result = script.invokeMethod(
+                            routeScript.methodName,
+                            handlerParam(
+                                script.metaClass.theClass.methods.find { it.name == routeScript.methodName }!!,
+                                ScriptParamNameDiscoverer(routeScript.content)
+                            ).params.map { it.value }.toTypedArray()
+                        )
+                        transactionManager.commit(ts)
+                    } catch (ex: Exception) {
+                        transactionManager.rollback(ts)
+                        ex.printStackTrace()
+                    }
                     call.respond(
                         when (result) {
                             is Unit -> throw RuntimeException("script should not return unit")
