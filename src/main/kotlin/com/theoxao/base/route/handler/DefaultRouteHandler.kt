@@ -5,7 +5,6 @@ import com.theoxao.base.persist.model.RouteScript
 import com.theoxao.base.route.RouteCacheService
 import com.theoxao.base.script.GroovyScriptService
 import com.theoxao.base.script.ScriptParamNameDiscoverer
-import com.theoxao.base.script.ast.AutowiredASTTransform.Companion.AUTOWIRE_BEAN_SUFFIX
 import com.theoxao.configuration.handlerParam
 import io.ktor.application.call
 import io.ktor.http.HttpMethod
@@ -19,7 +18,6 @@ import io.ktor.util.KtorExperimentalAPI
 import io.ktor.util.pipeline.ContextDsl
 import kotlinx.coroutines.future.await
 import org.slf4j.LoggerFactory
-import org.springframework.beans.BeansException
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
@@ -38,7 +36,6 @@ class DefaultRouteHandler(
     private val applicationEngine: ApplicationEngine,
     private val scriptService: GroovyScriptService,
     private val routeCacheService: RouteCacheService,
-    private val applicationContext: ApplicationContext,
     private val transactionManager: PlatformTransactionManager
 ) : RouteHandler {
 
@@ -57,36 +54,16 @@ class DefaultRouteHandler(
         routeCacheService.routeCache[routeScript.id] = routeScript
         applicationEngine.application.routing {
             markedRoute(routeScript.uri, HttpMethod(routeScript.requestMethod), routeScript.id) {
-                val script = scriptService.parse(routeScript.content)
-                //autowire beans  FIXME should be annotation driven
-                script.metaClass.properties.forEach {
-                    if (it.name.endsWith(AUTOWIRE_BEAN_SUFFIX)) {
-                        val type = it.type
-                        try {
-                            val bean = applicationContext.getBean(it.name.removeSuffix(AUTOWIRE_BEAN_SUFFIX))
-                            if (bean.javaClass.isAssignableFrom(type)) {
-                                script.metaClass.setProperty(script, it.name.removeSuffix(AUTOWIRE_BEAN_SUFFIX), bean)
-                            }
-                        } catch (ignore: BeansException) {
-                        }
-                    }
-                }
+                val script = scriptService.parseAndAutowire(routeScript.content)
                 handle {
-                    //TODO temporary solution
-                    val ts = transactionManager.getTransaction(DefaultTransactionDefinition())
-                    var result: Any? = null
-                    try {
-                        result = script.invokeMethod(
+                    val result: Any? = doInTransaction {
+                        return@doInTransaction script.invokeMethod(
                             routeScript.methodName,
                             handlerParam(
                                 script.metaClass.theClass.methods.find { it.name == routeScript.methodName }!!,
                                 ScriptParamNameDiscoverer(routeScript.content)
                             ).params.map { it.value }.toTypedArray()
                         )
-                        transactionManager.commit(ts)
-                    } catch (ex: Exception) {
-                        transactionManager.rollback(ts)
-                        ex.printStackTrace()
                     }
                     call.respond(
                         when (result) {
@@ -112,7 +89,20 @@ class DefaultRouteHandler(
                 false
             }
         }
+    }
 
+    private suspend fun doInTransaction(action: suspend () -> Any?): Any? {
+        //TODO temporary solution; transactions should be annotation driven
+        val ts = transactionManager.getTransaction(DefaultTransactionDefinition())
+        return try {
+            val any = action()
+            transactionManager.commit(ts)
+            any
+        } catch (ex: Exception) {
+            transactionManager.rollback(ts)
+            ex.printStackTrace()
+            null
+        }
     }
 }
 
