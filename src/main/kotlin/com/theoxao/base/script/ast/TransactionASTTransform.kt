@@ -35,7 +35,7 @@ open class TransactionASTTransform : ASTTransformation, ClassCodeExpressionTrans
     override fun visit(nodes: Array<out ASTNode>, source: SourceUnit) {
         sourceUnit = source
         if (nodes.size != 2 || nodes[0] !is AnnotationNode || nodes[1] !is AnnotatedNode) {
-            throw GroovyBugError("Internal error: expecting [AnnotationNode, AnnotatedNode] but got: " + Arrays.asList(*nodes))
+            throw GroovyBugError("Internal error: expecting [AnnotationNode, AnnotatedNode] but got: " + listOf(*nodes))
         }
         val annotationNode = nodes[0] as AnnotationNode
         val parent = nodes[1]
@@ -61,16 +61,14 @@ open class TransactionASTTransform : ASTTransformation, ClassCodeExpressionTrans
                 FieldNode(TRANSACTION_MANGER_NAME, 1, make(PlatformTransactionManager::class.java), null, null)
             dc.addField(tmFieldNode)
             val parameters = parent.parameters
-            val wrapTransaction = wrapTransaction(parent.name, parent.parameters)
+            val wrapTransaction = wrapTransaction(parent)
             parent.code = wrapTransaction
-//            super.visitClass(dc)
-//            val scopeVisitor = VariableScopeVisitor(source)
-//            scopeVisitor.visitClass(dc)
         }
     }
 
-    private fun wrapTransaction(originName: String, parameters: Array<Parameter>): Statement? {
+    private fun wrapTransaction(originMethod: MethodNode): Statement? {
         val methodBody = BlockStatement()
+        //add code TransactionStatus ts = tm.getTransaction(new DefaultTransactionDefinition())
         methodBody.addStatement(
             ExpressionStatement(
                 DeclarationExpression(
@@ -92,6 +90,7 @@ open class TransactionASTTransform : ASTTransformation, ClassCodeExpressionTrans
             )
         )
         val tryStatements = BlockStatement()
+        //add code def result = this.#originMethod$Suffix()
         tryStatements.addStatement(
             ExpressionStatement(
                 DeclarationExpression(
@@ -99,21 +98,30 @@ open class TransactionASTTransform : ASTTransformation, ClassCodeExpressionTrans
                     Token(Types.EQUAL, "=", -1, -1),
                     MethodCallExpression(
                         VariableExpression("this", make(Any::class.java)),
-                        ConstantExpression(originName + TRANSACTION_METHOD_SUFFIX),
-                        ArgumentListExpression(parameters)
+                        ConstantExpression(originMethod.name + TRANSACTION_METHOD_SUFFIX),
+                        ArgumentListExpression(originMethod.parameters)
                     )
                 )
             )
         )
+        //add code tm.commit(ts)
         tryStatements.addStatement(
             ExpressionStatement(
                 MethodCallExpression(
                     VariableExpression(TRANSACTION_MANGER_NAME, make(PlatformTransactionManager::class.java)),
                     ConstantExpression("commit"),
-                    ArgumentListExpression(arrayOf(VariableExpression("ts", make(TransactionStatus::class.java))))
+                    ArgumentListExpression(
+                        arrayOf(
+                            VariableExpression(
+                                TRANSACTION_STATUS_NAME,
+                                make(TransactionStatus::class.java)
+                            )
+                        )
+                    )
                 )
             )
         )
+        //add code  return result
         tryStatements.addStatement(
             ReturnStatement(
                 VariableExpression("result", make(Any::class.java))
@@ -123,6 +131,8 @@ open class TransactionASTTransform : ASTTransformation, ClassCodeExpressionTrans
             tryStatements, EmptyStatement()
         )
         val catchBlock = BlockStatement()
+
+        //add code tm.rollback(ts)
         catchBlock.addStatement(
             ExpressionStatement(
                 MethodCallExpression(
@@ -132,6 +142,7 @@ open class TransactionASTTransform : ASTTransformation, ClassCodeExpressionTrans
                 )
             )
         )
+        //add code throw e
         catchBlock.addStatement(ThrowStatement(VariableExpression("e", make(Exception::class.java))))
         val catchStatement = CatchStatement(
             Parameter(make(Exception::class.java), "e"),

@@ -5,6 +5,8 @@ import com.theoxao.base.persist.model.RouteScript
 import com.theoxao.base.route.RouteCacheService
 import com.theoxao.base.script.GroovyScriptService
 import com.theoxao.base.script.ScriptParamNameDiscoverer
+import com.theoxao.base.script.ast.ApiASTTransform.Companion.API_META_OBJECT_NAME
+import com.theoxao.base.script.ast.MetaApi
 import com.theoxao.configuration.handlerParam
 import io.ktor.application.call
 import io.ktor.http.HttpMethod
@@ -51,13 +53,23 @@ class DefaultRouteHandler(
     override fun addRoute(routeScript: RouteScript) {
         routeCacheService.routeCache[routeScript.id] = routeScript
         applicationEngine.application.routing {
-            markedRoute(routeScript.uri, HttpMethod(routeScript.requestMethod), routeScript.id) {
-                val script = scriptService.parseAndAutowire(routeScript.content)
+            val script = scriptService.parseAndAutowire(routeScript.content)
+            val metaApi = script.getProperty(API_META_OBJECT_NAME) as? MetaApi
+            var uri = routeScript.uri
+            var requestMethod = routeScript.requestMethod
+            var methodName = routeScript.methodName
+            //between routeScript and script annotation the later would prevail
+            metaApi?.let {
+                uri = it.uri
+                requestMethod = it.requestMethod
+                methodName = it.method
+            }
+            markedRoute(uri, HttpMethod(requestMethod), routeScript.id) {
                 handle {
                     val result: Any? = script.invokeMethod(
-                        routeScript.methodName,
+                        methodName,
                         handlerParam(
-                            script.metaClass.theClass.methods.find { it.name == routeScript.methodName }!!,
+                            script.metaClass.theClass.methods.find { it.name == methodName }!!,
                             ScriptParamNameDiscoverer(routeScript.content)
                         ).params.map { it.value }.toTypedArray()
                     )

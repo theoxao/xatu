@@ -29,7 +29,7 @@ class AutowiredASTTransform : ASTTransformation {
 
     override fun visit(nodes: Array<out ASTNode>, source: SourceUnit) {
         if (nodes.size != 2 || nodes[0] !is AnnotationNode || nodes[1] !is AnnotatedNode) {
-            throw GroovyBugError("Internal error: expecting [AnnotationNode, AnnotatedNode] but got: " + Arrays.asList(*nodes))
+            throw GroovyBugError("Internal error: expecting [AnnotationNode, AnnotatedNode] but got: " + listOf(*nodes))
         }
         val annotationNode = nodes[0]
         val de = nodes[1]

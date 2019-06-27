@@ -2,7 +2,10 @@ package com.theoxao.base.script
 
 import com.theoxao.base.common.GroovyShellHolder
 import com.theoxao.base.persist.repository.ScriptRepository
+import com.theoxao.base.script.ast.ApiASTTransform.Companion.API_META_FIELD_NAME
+import com.theoxao.base.script.ast.ApiASTTransform.Companion.API_META_OBJECT_NAME
 import com.theoxao.base.script.ast.AutowiredASTTransform
+import com.theoxao.base.script.ast.MetaApi
 import groovy.lang.Script
 import org.springframework.beans.BeansException
 import org.springframework.context.ApplicationContext
@@ -41,6 +44,10 @@ class GroovyScriptService(
                         bean
                     )
                 }
+            }
+            if (it.name == API_META_FIELD_NAME) {
+                val rawMeta = it.getProperty(script) as String
+                script.metaClass.setProperty(script, API_META_OBJECT_NAME, MetaApi.fromString(rawMeta))
             }
         }
         return script
