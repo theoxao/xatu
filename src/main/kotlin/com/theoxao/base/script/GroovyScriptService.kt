@@ -29,17 +29,17 @@ class GroovyScriptService(
         script.metaClass.properties.forEach {
             if (it.name.endsWith(AutowiredASTTransform.AUTOWIRE_BEAN_SUFFIX)) {
                 val type = it.type
-                try {
-                    val bean =
-                        applicationContext.getBean(it.name.removeSuffix(AutowiredASTTransform.AUTOWIRE_BEAN_SUFFIX))
-                    if (bean.javaClass.isAssignableFrom(type)) {
-                        script.metaClass.setProperty(
-                            script,
-                            it.name.removeSuffix(AutowiredASTTransform.AUTOWIRE_BEAN_SUFFIX),
-                            bean
-                        )
-                    }
+                val bean: Any = try {
+                    applicationContext.getBean(it.name.removeSuffix(AutowiredASTTransform.AUTOWIRE_BEAN_SUFFIX))
                 } catch (ignore: BeansException) {
+                    applicationContext.getBean(type)
+                }
+                if (type.isAssignableFrom(bean::class.java)) {
+                    script.metaClass.setProperty(
+                        script,
+                        it.name.removeSuffix(AutowiredASTTransform.AUTOWIRE_BEAN_SUFFIX),
+                        bean
+                    )
                 }
             }
         }

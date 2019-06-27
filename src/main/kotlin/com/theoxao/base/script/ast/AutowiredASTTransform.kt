@@ -34,7 +34,7 @@ class AutowiredASTTransform : ASTTransformation {
         val annotationNode = nodes[0]
         val de = nodes[1]
         if (de is DeclarationExpression) {
-            val cNode = de.getDeclaringClass()
+            val cNode = de.declaringClass
             if (de.isMultipleAssignmentDeclaration) {
                 addError("Annotation @Autowired not supported with multiple assignment notation.", de)
                 return
@@ -48,6 +48,7 @@ class AutowiredASTTransform : ASTTransformation {
 //            fieldNode.setSourcePosition(de)
             val autowireNode =
                 FieldNode("$variableName$AUTOWIRE_BEAN_SUFFIX", ve.modifiers, ve.type, null, de.rightExpression)
+//            cNode.addField(autowireNode)
             cNode.addProperty(PropertyNode(autowireNode, ve.modifiers, null, null))
         }
     }

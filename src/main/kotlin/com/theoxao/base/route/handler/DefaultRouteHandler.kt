@@ -18,10 +18,8 @@ import io.ktor.util.KtorExperimentalAPI
 import io.ktor.util.pipeline.ContextDsl
 import kotlinx.coroutines.future.await
 import org.slf4j.LoggerFactory
-import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
-import org.springframework.transaction.support.DefaultTransactionDefinition
 import java.util.concurrent.CompletableFuture
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.jvm.javaField
@@ -56,15 +54,13 @@ class DefaultRouteHandler(
             markedRoute(routeScript.uri, HttpMethod(routeScript.requestMethod), routeScript.id) {
                 val script = scriptService.parseAndAutowire(routeScript.content)
                 handle {
-                    val result: Any? = doInTransaction {
-                        return@doInTransaction script.invokeMethod(
-                            routeScript.methodName,
-                            handlerParam(
-                                script.metaClass.theClass.methods.find { it.name == routeScript.methodName }!!,
-                                ScriptParamNameDiscoverer(routeScript.content)
-                            ).params.map { it.value }.toTypedArray()
-                        )
-                    }
+                    val result: Any? = script.invokeMethod(
+                        routeScript.methodName,
+                        handlerParam(
+                            script.metaClass.theClass.methods.find { it.name == routeScript.methodName }!!,
+                            ScriptParamNameDiscoverer(routeScript.content)
+                        ).params.map { it.value }.toTypedArray()
+                    )
                     call.respond(
                         when (result) {
                             is Unit -> throw RuntimeException("script should not return unit")
@@ -88,20 +84,6 @@ class DefaultRouteHandler(
                 }
                 false
             }
-        }
-    }
-
-    private suspend fun doInTransaction(action: suspend () -> Any?): Any? {
-        //TODO temporary solution; transactions should be annotation driven
-        val ts = transactionManager.getTransaction(DefaultTransactionDefinition())
-        return try {
-            val any = action()
-            transactionManager.commit(ts)
-            any
-        } catch (ex: Exception) {
-            transactionManager.rollback(ts)
-            ex.printStackTrace()
-            null
         }
     }
 }
