@@ -77,7 +77,8 @@ class DefaultRouteHandler(
                         when (result) {
                             is Unit -> throw RuntimeException("script should not return unit")
                             is CompletableFuture<*> -> result.await()
-                            else -> result!!
+                            null -> "null"
+                            else -> result
                         }
                     )
                 }

@@ -14,7 +14,6 @@ import org.codehaus.groovy.transform.GroovyASTTransformation
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.TransactionStatus
 import org.springframework.transaction.support.DefaultTransactionDefinition
-import java.util.*
 
 
 /**
@@ -91,17 +90,23 @@ open class TransactionASTTransform : ASTTransformation, ClassCodeExpressionTrans
         )
         val tryStatements = BlockStatement()
         //add code def result = this.#originMethod$Suffix()
+
+        val callActualMethod = MethodCallExpression(
+            VariableExpression("this", make(Any::class.java)),
+            ConstantExpression(originMethod.name + TRANSACTION_METHOD_SUFFIX),
+            ArgumentListExpression(originMethod.parameters)
+        )
+
+
         tryStatements.addStatement(
             ExpressionStatement(
-                DeclarationExpression(
-                    VariableExpression("result", make(Any::class.java)),
-                    Token(Types.EQUAL, "=", -1, -1),
-                    MethodCallExpression(
-                        VariableExpression("this", make(Any::class.java)),
-                        ConstantExpression(originMethod.name + TRANSACTION_METHOD_SUFFIX),
-                        ArgumentListExpression(originMethod.parameters)
+                if (originMethod.returnType.name != "void")
+                    DeclarationExpression(
+                        VariableExpression("result", make(Any::class.java)),
+                        Token(Types.EQUAL, "=", -1, -1),
+                        callActualMethod
                     )
-                )
+                else callActualMethod
             )
         )
         //add code tm.commit(ts)
@@ -122,11 +127,12 @@ open class TransactionASTTransform : ASTTransformation, ClassCodeExpressionTrans
             )
         )
         //add code  return result
-        tryStatements.addStatement(
-            ReturnStatement(
-                VariableExpression("result", make(Any::class.java))
+        if (originMethod.returnType.name != "void")
+            tryStatements.addStatement(
+                ReturnStatement(
+                    VariableExpression("result", make(Any::class.java))
+                )
             )
-        )
         val tryCatchStatement = TryCatchStatement(
             tryStatements, EmptyStatement()
         )
