@@ -1,13 +1,12 @@
 package com.theoxao.base.script
 
-import com.google.common.collect.Maps
-import com.theoxao.base.script.antlr.AsyncriptLexer
-import com.theoxao.base.script.antlr.AsyncriptParser
-import com.theoxao.base.script.antlr.ParamNameListener
-import org.antlr.v4.runtime.*
-import org.antlr.v4.runtime.tree.ParseTreeWalker
-import org.apache.groovy.util.concurrentlinkedhashmap.ConcurrentLinkedHashMap
+import com.theoxao.base.script.antlr.GroovyMethodVisitor
+import groovyjarjarantlr.CommonAST
+import org.codehaus.groovy.antlr.GroovySourceAST
+import org.codehaus.groovy.antlr.parser.GroovyLexer
+import org.codehaus.groovy.antlr.parser.GroovyRecognizer
 import org.springframework.core.ParameterNameDiscoverer
+import java.io.DataInputStream
 import java.lang.reflect.Constructor
 import java.lang.reflect.Method
 import java.util.concurrent.ConcurrentHashMap
@@ -36,30 +35,20 @@ class ScriptParamNameDiscoverer(val script: String) : ParameterNameDiscoverer {
     private val parser = script.parse()
 
     override fun getParameterNames(method: Method): Array<String>? {
-        var expect = cache[script]
-        if (expect != null && expect.isNotEmpty()) {
-            return expect
-        }
-        val compilationUnit = parser.compilationUnit()
-        val listener = ParamNameListener()
-        ParseTreeWalker.DEFAULT.walk(listener, compilationUnit)
-        expect = listener.paramNameList.toTypedArray()
-        cache[script] = expect
-        return expect
+        return arrayOf()
     }
 
     override fun getParameterNames(ctor: Constructor<*>): Array<String>? = TODO()
 
 
-    private fun String.parse(): AsyncriptParser {
-        val inputStream: CharStream = ANTLRInputStream(this)
-        val lexer: TokenSource = AsyncriptLexer(inputStream)
-        val tokenStream: TokenStream = CommonTokenStream(lexer)
-        val parser = AsyncriptParser(tokenStream)
-        parser.removeErrorListeners()
-        parser.addErrorListener(DiagnosticErrorListener())
-        parser.errorHandler = DefaultErrorStrategy()
-        parser.addErrorListener(ConsoleErrorListener())
-        return parser
+    private fun String.parse() {
+        val lexer = GroovyLexer(DataInputStream(this.byteInputStream()))
+        val recognizer = GroovyRecognizer(lexer)
+        recognizer.compilationUnit()
+        val ast = recognizer.ast as CommonAST
+        val visitor = GroovyMethodVisitor()
+        val groovySourceAST = GroovySourceAST()
+        groovySourceAST.initialize(ast)
+//        visitor.visitMethodDef(groovySourceAST  ,)
     }
 }
