@@ -1,8 +1,10 @@
 package com.theoxao.base.route.loader
 
-import com.theoxao.base.route.handler.RouteHandler
 import com.theoxao.base.persist.model.InnerRouteScript
 import com.theoxao.base.persist.model.RouteScript
+import com.theoxao.base.route.handler.RouteHandler
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.stereotype.Component
 
@@ -14,10 +16,10 @@ import org.springframework.stereotype.Component
 class InnerRouteLoader(private val mongoTemplate: MongoTemplate, private val routeHandler: RouteHandler) :
     RouteLoader(routeHandler) {
     init {
-        load()
+        GlobalScope.launch { load() }
     }
 
-    override fun routeSupplier(): List<RouteScript>? =
+    override suspend fun routeSupplier(): List<RouteScript>? =
         mongoTemplate.findAll(InnerRouteScript::class.java) ?: null
 
 }

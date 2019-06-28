@@ -5,11 +5,9 @@ import com.theoxao.base.route.handler.RouteHandler
 import com.theoxao.base.persist.model.RouteScript
 
 abstract class FileRouteLoader(private val routeHandler: RouteHandler) : RouteLoader(routeHandler) {
-    override fun routeSupplier(): List<RouteScript>? {
-        val script = GroovyShellHolder.shell.parse(getScriptData())
-        //FILLME
-        return null
-    }
+    abstract override suspend fun routeSupplier(): List<RouteScript>?
+
+    abstract suspend fun reload()
 
     abstract fun getScriptData(): String
 

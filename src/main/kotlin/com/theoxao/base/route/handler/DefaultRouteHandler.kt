@@ -22,6 +22,10 @@ import kotlinx.coroutines.future.await
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.util.Assert
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
+import reactor.core.publisher.toMono
 import java.util.concurrent.CompletableFuture
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.jvm.javaField
@@ -52,8 +56,9 @@ class DefaultRouteHandler(
     @KtorExperimentalLocationsAPI
     override fun addRoute(routeScript: RouteScript) {
         routeCacheService.routeCache[routeScript.id] = routeScript
+        val script = scriptService.parseAndAutowire(routeScript.content!!)
+        script ?: return
         applicationEngine.application.routing {
-            val script = scriptService.parseAndAutowire(routeScript.content)
             val metaApi = script.getProperty(API_META_OBJECT_NAME) as? MetaApi
             var uri = routeScript.uri
             var requestMethod = routeScript.requestMethod
@@ -70,13 +75,15 @@ class DefaultRouteHandler(
                         methodName,
                         handlerParam(
                             script.metaClass.theClass.methods.find { it.name == methodName }!!,
-                            ScriptParamNameDiscoverer(routeScript.content)
+                            ScriptParamNameDiscoverer(routeScript.content!!)
                         ).params.map { it.value }.toTypedArray()
                     )
                     call.respond(
                         when (result) {
                             is Unit -> throw RuntimeException("script should not return unit")
                             is CompletableFuture<*> -> result.await()
+                            is Mono<*> -> result.toFuture().await()
+                            is Flux<*> -> result.toMono().toFuture().await()
                             null -> "null"
                             else -> result
                         }

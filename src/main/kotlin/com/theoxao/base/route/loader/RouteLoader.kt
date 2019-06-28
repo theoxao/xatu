@@ -1,7 +1,7 @@
 package com.theoxao.base.route.loader
 
-import com.theoxao.base.route.handler.RouteHandler
 import com.theoxao.base.persist.model.RouteScript
+import com.theoxao.base.route.handler.RouteHandler
 
 
 /**
@@ -13,13 +13,13 @@ import com.theoxao.base.persist.model.RouteScript
 
 abstract class RouteLoader(private val routeHandler: RouteHandler) {
 
-    protected fun load() {
+    suspend fun load() {
         routeSupplier()?.forEach {
             routeHandler.addRoute(it)
         }
     }
 
-    abstract fun routeSupplier(): List<RouteScript>?
+    abstract suspend fun routeSupplier(): List<RouteScript>?
 
 
 }

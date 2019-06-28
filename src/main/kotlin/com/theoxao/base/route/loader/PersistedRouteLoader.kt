@@ -2,8 +2,10 @@ package com.theoxao.base.route.loader
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.theoxao.base.common.Constant
-import com.theoxao.base.route.handler.RouteHandler
 import com.theoxao.base.persist.model.RouteScript
+import com.theoxao.base.route.handler.RouteHandler
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Component
 
@@ -16,10 +18,10 @@ class PersistedRouteLoader(private val routeHandler: RouteHandler, private val r
     RouteLoader(routeHandler) {
 
     init {
-        load()
+        GlobalScope.launch { load() }
     }
 
-    override fun routeSupplier(): List<RouteScript> =
+    override suspend fun routeSupplier(): List<RouteScript> =
         redisTemplate.keys("${Constant.ROUTE_DATA_REDIS_PREFIX}*").map {
             val routeData = redisTemplate.boundValueOps(it).get()
             ObjectMapper().readValue<RouteScript>(routeData, RouteScript::class.java)

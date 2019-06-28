@@ -11,7 +11,7 @@ import org.springframework.data.mongodb.core.mapping.Document
  */
 open class ScriptModel {
 
-    var content = ""
+    var content: String? = null
 
     var methodName = "service"
 
