@@ -3,7 +3,6 @@ package com.theoxao.base.script.ast
 import org.codehaus.groovy.GroovyException
 import org.codehaus.groovy.ast.ASTNode
 import org.codehaus.groovy.ast.ClassHelper.make
-import org.codehaus.groovy.ast.FieldNode
 import org.codehaus.groovy.ast.MethodNode
 import org.codehaus.groovy.ast.ModuleNode
 import org.codehaus.groovy.ast.expr.ConstantExpression
@@ -19,24 +18,25 @@ import org.codehaus.groovy.transform.GroovyASTTransformation
  */
 @GroovyASTTransformation(phase = CompilePhase.SEMANTIC_ANALYSIS)
 class ParameterNameTransform : ASTTransformation {
-    override fun visit(nodes: Array<out ASTNode>?, source: SourceUnit?) {
+    override fun visit(nodes: Array<out ASTNode>?, source: SourceUnit) {
         if (nodes == null || nodes.size > 1 || nodes[0] !is ModuleNode) {
             throw GroovyException("something wrong")
         }
         val mn = nodes[0] as ModuleNode
-        val parameterMap = mutableMapOf<String, List<String>>()
+        val parameterMap = mutableMapOf<String, String>()
+        val firstClass = mn.classes[0]
         mn.methods.forEach {
-            parameterMap[it.name] = it.parameterNames()
+            firstClass.addField(
+                it.name + "\$parameterNames",
+                1,
+                make(String::class.java),
+                ConstantExpression(it.parameterNames())
+            )
         }
-        val fieldNode =
-            FieldNode("\$parameterNames\$", 1, make(Map::class.java), null, ConstantExpression(parameterMap))
-        mn.classes[0].addField(fieldNode)
     }
 
-    private fun MethodNode.parameterNames(): List<String> {
-        return this.parameters.map {
-            it.name
-        }
+    private fun MethodNode.parameterNames(): String {
+        return this.parameters.joinToString(",") { it.name }
     }
 
 }
