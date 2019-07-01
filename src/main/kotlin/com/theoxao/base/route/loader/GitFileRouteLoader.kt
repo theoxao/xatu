@@ -1,5 +1,6 @@
 package com.theoxao.base.route.loader
 
+import com.theoxao.base.common.GithubConfiguration
 import com.theoxao.base.persist.model.GithubData
 import com.theoxao.base.persist.model.RouteScript
 import com.theoxao.base.route.handler.RouteHandler
