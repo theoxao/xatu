@@ -1,11 +1,9 @@
 package com.theoxao.base.script
 
-import org.codehaus.groovy.antlr.SourceBuffer
-import org.codehaus.groovy.antlr.UnicodeEscapingReader
-import org.codehaus.groovy.antlr.parser.GroovyLexer
-import org.codehaus.groovy.antlr.parser.GroovyRecognizer
+import com.theoxao.base.script.ast.ParameterNameTransform.Companion.PARAMETER_NAMES_FIELD_SUFFIX
+import com.theoxao.configuration.signature
+import groovy.lang.Script
 import org.springframework.core.ParameterNameDiscoverer
-import java.io.StringReader
 import java.lang.reflect.Constructor
 import java.lang.reflect.Method
 import java.util.concurrent.ConcurrentHashMap
@@ -15,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap
  * @author theo
  * @date 2019/6/20
  */
-class ScriptParamNameDiscoverer(val script: String) : ParameterNameDiscoverer {
+class ScriptParamNameDiscoverer(val script: Script) : ParameterNameDiscoverer {
 
     companion object {
         val cache = object : ConcurrentHashMap<String, Array<String>>() {
@@ -31,29 +29,18 @@ class ScriptParamNameDiscoverer(val script: String) : ParameterNameDiscoverer {
         }
     }
 
-    private val parser = script.parse()
 
     override fun getParameterNames(method: Method): Array<String>? {
-        return arrayOf()
+        var pns = cache[method.signature()]
+        if (pns == null) {
+            val property = script.getProperty("${method.name}$PARAMETER_NAMES_FIELD_SUFFIX")
+            pns = (property as ArrayList<String>).toTypedArray()
+            cache[method.signature()] = pns
+        }
+        return pns
     }
 
     override fun getParameterNames(ctor: Constructor<*>): Array<String>? = TODO()
 
 
-    private fun String.parse() {
-        val ps = getParser()
-        val tokenNames = ps.tokenNames
-        ps.compilationUnit()
-        val ast = ps.ast
-    }
-
-    private fun String.getParser(): GroovyRecognizer {
-        val sourceBuffer = SourceBuffer()
-        val unicodeReader = UnicodeEscapingReader(StringReader(this), sourceBuffer)
-        val lexer = GroovyLexer(unicodeReader)
-        unicodeReader.setLexer(lexer)
-        val parser = GroovyRecognizer.make(lexer)
-        parser.setSourceBuffer(sourceBuffer)
-        return parser
-    }
 }
