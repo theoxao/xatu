@@ -80,7 +80,11 @@ open class TransactionASTTransform : ASTTransformation, ClassCodeExpressionTrans
                             arrayOf(
                                 ConstructorCallExpression(
                                     make(DefaultTransactionDefinition::class.java),
-                                    ArgumentListExpression.EMPTY_ARGUMENTS
+                                    ArgumentListExpression(
+                                        arrayOf(
+                                            ConstantExpression(6)
+                                        )
+                                    )
                                 )
                             )
                         )
