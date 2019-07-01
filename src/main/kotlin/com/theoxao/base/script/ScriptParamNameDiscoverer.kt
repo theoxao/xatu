@@ -1,12 +1,11 @@
 package com.theoxao.base.script
 
-import com.theoxao.base.script.antlr.GroovyMethodVisitor
-import groovyjarjarantlr.CommonAST
-import org.codehaus.groovy.antlr.GroovySourceAST
+import org.codehaus.groovy.antlr.SourceBuffer
+import org.codehaus.groovy.antlr.UnicodeEscapingReader
 import org.codehaus.groovy.antlr.parser.GroovyLexer
 import org.codehaus.groovy.antlr.parser.GroovyRecognizer
 import org.springframework.core.ParameterNameDiscoverer
-import java.io.DataInputStream
+import java.io.StringReader
 import java.lang.reflect.Constructor
 import java.lang.reflect.Method
 import java.util.concurrent.ConcurrentHashMap
@@ -42,13 +41,19 @@ class ScriptParamNameDiscoverer(val script: String) : ParameterNameDiscoverer {
 
 
     private fun String.parse() {
-        val lexer = GroovyLexer(DataInputStream(this.byteInputStream()))
-        val recognizer = GroovyRecognizer(lexer)
-        recognizer.compilationUnit()
-        val ast = recognizer.ast as CommonAST
-        val visitor = GroovyMethodVisitor()
-        val groovySourceAST = GroovySourceAST()
-        groovySourceAST.initialize(ast)
-//        visitor.visitMethodDef(groovySourceAST  ,)
+        val ps = getParser()
+        val tokenNames = ps.tokenNames
+        ps.compilationUnit()
+        val ast = ps.ast
+    }
+
+    private fun String.getParser(): GroovyRecognizer {
+        val sourceBuffer = SourceBuffer()
+        val unicodeReader = UnicodeEscapingReader(StringReader(this), sourceBuffer)
+        val lexer = GroovyLexer(unicodeReader)
+        unicodeReader.setLexer(lexer)
+        val parser = GroovyRecognizer.make(lexer)
+        parser.setSourceBuffer(sourceBuffer)
+        return parser
     }
 }

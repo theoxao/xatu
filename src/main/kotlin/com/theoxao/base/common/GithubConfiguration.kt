@@ -1,4 +1,4 @@
-package com.theoxao.base.route.loader
+package com.theoxao.base.common
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Configuration
