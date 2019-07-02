@@ -138,7 +138,7 @@ open class TransactionASTTransform : ASTTransformation, ClassCodeExpressionTrans
                 )
             )
         val tryCatchStatement = TryCatchStatement(
-            tryStatements, EmptyStatement()
+            tryStatements, EmptyStatement.INSTANCE
         )
         val catchBlock = BlockStatement()
 
