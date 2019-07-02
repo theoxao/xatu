@@ -22,7 +22,6 @@ import kotlinx.coroutines.future.await
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
-import org.springframework.util.Assert
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.publisher.toMono
@@ -75,7 +74,7 @@ class DefaultRouteHandler(
                         methodName,
                         handlerParam(
                             script.metaClass.theClass.methods.find { it.name == methodName }!!,
-                            ScriptParamNameDiscoverer(routeScript.content!!)
+                            ScriptParamNameDiscoverer(script)
                         ).params.map { it.value }.toTypedArray()
                     )
                     call.respond(
