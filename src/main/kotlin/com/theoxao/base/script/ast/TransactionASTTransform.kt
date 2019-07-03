@@ -1,8 +1,12 @@
 package com.theoxao.base.script.ast
 
+import com.theoxao.base.script.ast.JavaNodes.anyNode
+import com.theoxao.base.script.ast.JavaNodes.exceptionNode
+import com.theoxao.base.script.ast.JavaNodes.tmNode
+import com.theoxao.base.script.ast.JavaNodes.transactionDefinitionNode
+import com.theoxao.base.script.ast.JavaNodes.tsNode
 import org.codehaus.groovy.GroovyBugError
 import org.codehaus.groovy.ast.*
-import org.codehaus.groovy.ast.ClassHelper.make
 import org.codehaus.groovy.ast.expr.*
 import org.codehaus.groovy.ast.stmt.*
 import org.codehaus.groovy.control.CompilePhase
@@ -11,9 +15,6 @@ import org.codehaus.groovy.syntax.Token
 import org.codehaus.groovy.syntax.Types
 import org.codehaus.groovy.transform.ASTTransformation
 import org.codehaus.groovy.transform.GroovyASTTransformation
-import org.springframework.transaction.PlatformTransactionManager
-import org.springframework.transaction.TransactionStatus
-import org.springframework.transaction.support.DefaultTransactionDefinition
 
 
 /**
@@ -52,12 +53,12 @@ open class TransactionASTTransform : ASTTransformation, ClassCodeExpressionTrans
             val autowireNode =
                 FieldNode(
                     "$TRANSACTION_MANGER_NAME${AutowiredASTTransform.AUTOWIRE_BEAN_SUFFIX}", 1,
-                    make(PlatformTransactionManager::class.java), null, null
+                    tmNode, null, null
                 )
 //            dc.addField(autowireNode)
             dc.addProperty(PropertyNode(autowireNode, autowireNode.modifiers, null, null))
             val tmFieldNode =
-                FieldNode(TRANSACTION_MANGER_NAME, 1, make(PlatformTransactionManager::class.java), null, null)
+                FieldNode(TRANSACTION_MANGER_NAME, 1, tmNode, null, null)
             dc.addField(tmFieldNode)
             val parameters = parent.parameters
             val wrapTransaction = wrapTransaction(parent)
@@ -71,15 +72,15 @@ open class TransactionASTTransform : ASTTransformation, ClassCodeExpressionTrans
         methodBody.addStatement(
             ExpressionStatement(
                 DeclarationExpression(
-                    VariableExpression(TRANSACTION_STATUS_NAME, make(TransactionStatus::class.java)),
+                    VariableExpression(TRANSACTION_STATUS_NAME, tsNode),
                     Token(Types.EQUAL, "=", -1, -1),
                     MethodCallExpression(
-                        VariableExpression(TRANSACTION_MANGER_NAME, make(PlatformTransactionManager::class.java)),
+                        VariableExpression(TRANSACTION_MANGER_NAME, tmNode),
                         ConstantExpression("getTransaction"),
                         ArgumentListExpression(
                             arrayOf(
                                 ConstructorCallExpression(
-                                    make(DefaultTransactionDefinition::class.java),
+                                    transactionDefinitionNode,
                                     ArgumentListExpression(
                                         arrayOf(
                                             ConstantExpression(6)
@@ -96,7 +97,7 @@ open class TransactionASTTransform : ASTTransformation, ClassCodeExpressionTrans
         //add code def result = this.#originMethod$Suffix()
 
         val callActualMethod = MethodCallExpression(
-            VariableExpression("this", make(Any::class.java)),
+            VariableExpression("this", anyNode),
             ConstantExpression(originMethod.name + TRANSACTION_METHOD_SUFFIX),
             ArgumentListExpression(originMethod.parameters)
         )
@@ -106,7 +107,7 @@ open class TransactionASTTransform : ASTTransformation, ClassCodeExpressionTrans
             ExpressionStatement(
                 if (originMethod.returnType.name != "void")
                     DeclarationExpression(
-                        VariableExpression("result", make(Any::class.java)),
+                        VariableExpression("result", anyNode),
                         Token(Types.EQUAL, "=", -1, -1),
                         callActualMethod
                     )
@@ -117,13 +118,13 @@ open class TransactionASTTransform : ASTTransformation, ClassCodeExpressionTrans
         tryStatements.addStatement(
             ExpressionStatement(
                 MethodCallExpression(
-                    VariableExpression(TRANSACTION_MANGER_NAME, make(PlatformTransactionManager::class.java)),
+                    VariableExpression(TRANSACTION_MANGER_NAME, tmNode),
                     ConstantExpression("commit"),
                     ArgumentListExpression(
                         arrayOf(
                             VariableExpression(
                                 TRANSACTION_STATUS_NAME,
-                                make(TransactionStatus::class.java)
+                                tsNode
                             )
                         )
                     )
@@ -134,7 +135,7 @@ open class TransactionASTTransform : ASTTransformation, ClassCodeExpressionTrans
         if (originMethod.returnType.name != "void")
             tryStatements.addStatement(
                 ReturnStatement(
-                    VariableExpression("result", make(Any::class.java))
+                    VariableExpression("result", anyNode)
                 )
             )
         val tryCatchStatement = TryCatchStatement(
@@ -146,16 +147,16 @@ open class TransactionASTTransform : ASTTransformation, ClassCodeExpressionTrans
         catchBlock.addStatement(
             ExpressionStatement(
                 MethodCallExpression(
-                    VariableExpression(TRANSACTION_MANGER_NAME, make(PlatformTransactionManager::class.java)),
+                    VariableExpression(TRANSACTION_MANGER_NAME, tmNode),
                     ConstantExpression("rollback"),
-                    VariableExpression(TRANSACTION_STATUS_NAME, make(TransactionStatus::class.java))
+                    VariableExpression(TRANSACTION_STATUS_NAME, tsNode)
                 )
             )
         )
         //add code throw e
-        catchBlock.addStatement(ThrowStatement(VariableExpression("e", make(Exception::class.java))))
+        catchBlock.addStatement(ThrowStatement(VariableExpression("e", exceptionNode)))
         val catchStatement = CatchStatement(
-            Parameter(make(Exception::class.java), "e"),
+            Parameter(exceptionNode, "e"),
             catchBlock
         )
         tryCatchStatement.addCatch(catchStatement)

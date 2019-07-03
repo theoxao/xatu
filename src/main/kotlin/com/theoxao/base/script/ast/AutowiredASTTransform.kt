@@ -11,7 +11,6 @@ import org.codehaus.groovy.control.SourceUnit
 import org.codehaus.groovy.transform.ASTTransformation
 import org.codehaus.groovy.transform.GroovyASTTransformation
 import org.codehaus.groovy.transform.GroovyASTTransformationClass
-import java.util.*
 
 
 /**
@@ -25,7 +24,6 @@ class AutowiredASTTransform : ASTTransformation {
         const val AUTOWIRE_BEAN_SUFFIX = "\$autowire"
     }
 
-    private val ASTTRANSFORMCLASS_TYPE = make(GroovyASTTransformationClass::class.java)
 
     override fun visit(nodes: Array<out ASTNode>, source: SourceUnit) {
         if (nodes.size != 2 || nodes[0] !is AnnotationNode || nodes[1] !is AnnotatedNode) {
@@ -51,19 +49,5 @@ class AutowiredASTTransform : ASTTransformation {
 //            cNode.addField(autowireNode)
             cNode.addProperty(PropertyNode(autowireNode, ve.modifiers, null, null))
         }
-    }
-
-    private fun notTransform(annotationClassNode: ClassNode): Boolean {
-        return annotationClassNode.getAnnotations(ASTTRANSFORMCLASS_TYPE).isEmpty()
-    }
-
-
-    private fun acceptableTransform(annotation: AnnotationNode): Boolean {
-        // TODO also check for phase after sourceUnit.getPhase()? but will be ignored anyway?
-        // TODO we should only copy those annotations with FIELD_TARGET but haven't visited annotations
-        // and gathered target info at this phase, so we can't do this:
-        // return annotation.isTargetAllowed(AnnotationNode.FIELD_TARGET);
-        // instead just don't copy ourselves for now
-        return annotation.classNode != make(Autowired::class.java)
     }
 }

@@ -1,8 +1,9 @@
 package com.theoxao.base.script.ast
 
+import com.theoxao.base.script.ast.JavaNodes.listNode
+import com.theoxao.base.script.ast.JavaNodes.stringNode
 import org.codehaus.groovy.GroovyException
 import org.codehaus.groovy.ast.*
-import org.codehaus.groovy.ast.ClassHelper.make
 import org.codehaus.groovy.ast.expr.ArrayExpression
 import org.codehaus.groovy.ast.expr.ConstantExpression
 import org.codehaus.groovy.ast.tools.GenericsUtils
@@ -30,18 +31,19 @@ class ParameterNameTransform : ASTTransformation {
         val mn = nodes[0] as ModuleNode
         val firstClass = mn.classes[0]
         mn.methods.forEach {
-            val genericsNode = make(List::class.java).setGenerics(GenericsType(make(String::class.java)))
+
+            val genericsNode = listNode.setGenerics(GenericsType(stringNode))
             val fieldNode =
                 FieldNode(
                     "${it.name}$PARAMETER_NAMES_FIELD_SUFFIX",
                     1,
                     GenericsUtils.makeClassSafeWithGenerics(
-                        make(List::class.java),
-                        GenericsType(make(String::class.java))
+                        listNode,
+                        GenericsType(stringNode)
                     ),
                     null,
                     ArrayExpression(
-                        make(String::class.java),
+                        stringNode,
                         it.parameterNames().map { ConstantExpression(it) }
                     )
                 )
