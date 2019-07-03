@@ -33,7 +33,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.theoxao:spring-boot-ktor:0.3.1-beta'
+    implementation 'com.theoxao:spring-boot-ktor:0.3.2-beta'
     implementation 'org.codehaus.groovy:groovy:3.0.0-beta-1'
     implementation 'org.codehaus.groovy:groovy-json:3.0.0-beta-1'
     implementation 'com.google.guava:guava:27.1-jre'
