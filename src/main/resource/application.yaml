@@ -1,7 +1,7 @@
 iotaki:
   script:
     route:
-      #      git: https://github.com/iotaki/metatron
+      git: https://github.com/iotaki/metatron
       branch: master
       path: src/test
       packageAsRoute: true
