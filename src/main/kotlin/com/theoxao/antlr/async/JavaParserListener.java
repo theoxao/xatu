@@ -1,5 +1,5 @@
 // Generated from com\theoxao\antlr\target\JavaParser.g4 by ANTLR 4.6
-package com.theoxao.antlr;
+package com.theoxao.antlr.async;
 
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
