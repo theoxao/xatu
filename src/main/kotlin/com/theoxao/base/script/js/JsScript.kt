@@ -4,11 +4,11 @@ package com.theoxao.base.script.js
 /**
  * create by theoxao on 2019/7/7
  */
-class JsScript {
+class JsScript(var content: String = "") {
 
     val imports: List<JsImport> = mutableListOf()
 
-    var content: String = ""
+    val resultName: String = "result"
 }
 
 

@@ -13,6 +13,9 @@ MongoTemplate mongoTemplate
 RestResponse<?> add(String name, String desc) {
     println(name)
     App app = new App()
+    App.Companion.future().thenApply { pp ->
+        pp.reverse()
+    }
     app.name = name
     app.desc = desc
     println(app.name)

@@ -37,7 +37,7 @@ dependencies {
     implementation 'org.codehaus.groovy:groovy:3.0.0-beta-1'
     implementation 'org.codehaus.groovy:groovy-json:3.0.0-beta-1'
     implementation 'com.google.guava:guava:27.1-jre'
-    implementation 'org.antlr:antlr4-runtime:4.7.2'
+    implementation 'org.antlr:antlr4-runtime:4.6'
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
     implementation "org.springframework.boot:spring-boot-starter-data-redis"

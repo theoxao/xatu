@@ -1,18 +1,21 @@
 package com.theoxao
 
-import com.theoxao.base.persist.model.RouteScript
-import com.theoxao.base.route.handler.RouteHandler
-import org.bson.types.ObjectId
-import org.slf4j.LoggerFactory
+import com.theoxao.antlr.AsyncGroovyListener
+import com.theoxao.antlr.AsyncGroovyParser
+import com.theoxao.antlr.JavaLexer
+import com.theoxao.antlr.JavaParser
+import com.theoxao.base.script.js.JsScriptHandler
+import org.antlr.v4.runtime.ANTLRInputStream
+import org.antlr.v4.runtime.BailErrorStrategy
+import org.antlr.v4.runtime.CommonTokenStream
+import org.antlr.v4.runtime.tree.ParseTreeWalker
 import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.runApplication
-import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.data.mongodb.MongoDbFactory
 import org.springframework.data.mongodb.MongoTransactionManager
-import org.springframework.transaction.annotation.EnableTransactionManagement
 
 
 /**
@@ -23,16 +26,26 @@ import org.springframework.transaction.annotation.EnableTransactionManagement
 @EnableConfigurationProperties
 open class Application {
 
-    private val log = LoggerFactory.getLogger(this.javaClass.name)
 
     @Bean
-    open fun runner(applicationContext: ApplicationContext, routeHandler: RouteHandler): CommandLineRunner {
+    open fun runner(jsScriptHandler: JsScriptHandler): CommandLineRunner {
         return CommandLineRunner {
-            val raw = this.javaClass.classLoader.getResource("test_list.groovy")?.readText()
-            val record = RouteScript()
-            record.id = ObjectId().toHexString()
-            record.content = raw!!
-            routeHandler.addRoute(record)
+            //            val text = this.javaClass.classLoader.getResource("demo.js")?.readText()
+//            text?.let {
+//                val js = JsScript(text)
+//                jsScriptHandler.function(js)
+//                val member = jsScriptHandler.jsContext.getBindings("js").getMember(js.resultName)
+//                println(member.asString())
+//            }
+            val text = this.javaClass.classLoader.getResource("async_java.java")?.readText()!!
+            val stream = ANTLRInputStream(text)
+            val lexer = JavaLexer(stream)
+            val tokenStream = CommonTokenStream(lexer)
+            val javaParser = JavaParser(tokenStream)
+            javaParser.removeErrorListeners()
+            javaParser.errorHandler = BailErrorStrategy()
+            val compilationUnit = javaParser.compilationUnit()
+            ParseTreeWalker.DEFAULT.walk(AsyncGroovyListener(tokenStream), compilationUnit)
         }
     }
 

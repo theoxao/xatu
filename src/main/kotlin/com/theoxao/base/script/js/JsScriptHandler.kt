@@ -1,14 +1,15 @@
 package com.theoxao.base.script.js
 
 import org.graalvm.polyglot.Context
+import org.springframework.stereotype.Component
 
 
 /**
  * create by theoxao on 2019/7/7
  */
-
+@Component
 class JsScriptHandler {
-    private val jsContext: Context = Context.create("js")
+    val jsContext: Context = Context.create("js")
 
 
     fun function(js: JsScript): Any? {
