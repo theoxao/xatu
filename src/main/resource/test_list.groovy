@@ -5,6 +5,8 @@ import com.theoxao.test.App
 import groovy.transform.Field
 import org.springframework.data.mongodb.core.MongoTemplate
 
+import java.util.concurrent.CompletableFuture
+
 @Field
 @Autowired
 MongoTemplate mongoTemplate
@@ -21,4 +23,15 @@ RestResponse<?> add(String name, String desc) {
     println(app.name)
     mongoTemplate.save(app)
     return new RestResponse<?>(200)
+}
+
+
+class Foo {
+    public static CompletableFuture<String> asyncJava() {
+        CompletableFuture<String> myFuture = App.Companion.future();
+        return myFuture.thenApply { my ->
+
+            return my;
+        }
+    }
 }

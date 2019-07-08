@@ -21,7 +21,6 @@ import io.ktor.util.pipeline.ContextDsl
 import kotlinx.coroutines.future.await
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import org.springframework.transaction.PlatformTransactionManager
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.publisher.toMono
@@ -38,8 +37,7 @@ import kotlin.reflect.jvm.javaField
 class DefaultRouteHandler(
     private val applicationEngine: ApplicationEngine,
     private val scriptService: GroovyScriptService,
-    private val routeCacheService: RouteCacheService,
-    private val transactionManager: PlatformTransactionManager
+    private val routeCacheService: RouteCacheService
 ) : RouteHandler {
 
     private val log = LoggerFactory.getLogger(this::class.java.name)

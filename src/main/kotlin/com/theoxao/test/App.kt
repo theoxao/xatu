@@ -28,9 +28,7 @@ class App {
         return this.id.toHexString() + this.name + this.desc
     }
 
-    companion object {
-        fun future(): CompletableFuture<String> {
-            return CompletableFuture.completedFuture("this is a message from future")
-        }
+    fun future(): CompletableFuture<String> {
+        return CompletableFuture.completedFuture("this is a message from future")
     }
 }

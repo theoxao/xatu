@@ -13,8 +13,11 @@ class AsyncGroovyListener(private val tokenStream: TokenStream) : JavaParserBase
     var writer: TokenStreamRewriter = TokenStreamRewriter(tokenStream)
     var awaitVariableMap = mutableMapOf<String, ParserRuleContext>()
     var hasReturn: Boolean = false
+    var awaitable: Boolean = false
+    var hasClass: Boolean = false
 
     override fun enterAwaitVariableInitializer(ctx: JavaParser.AwaitVariableInitializerContext) {
+        awaitable = true
         ctx.AWAIT().let {
             writer.delete(it.symbol)
         }
@@ -39,11 +42,23 @@ class AsyncGroovyListener(private val tokenStream: TokenStream) : JavaParserBase
             bs.stop,
             "\n ${if (hasReturn) "return " else ""}${variableName}Future.thenApply{ $variableName->\n"
         )
-
+        writer.insertAfter(block.stop, "\n}")
 
     }
 
-    override fun exitCompilationUnit(ctx: JavaParser.CompilationUnitContext?) {
-        println(writer.text)
+    override fun enterClassDeclaration(ctx: JavaParser.ClassDeclarationContext) {
+        hasClass = true
+        writer.insertBefore(ctx.start, "import java.util.concurrent.CompletableFuture; \n")
     }
+
+    override fun enterMethodDeclaration(ctx: JavaParser.MethodDeclarationContext) {
+        if (hasClass.not()) {
+            writer.insertBefore(ctx.start, "import java.util.concurrent.CompletableFuture;\n")
+        }
+    }
+
+    fun whatDidYouHear(): String {
+        return writer.text
+    }
+
 }
