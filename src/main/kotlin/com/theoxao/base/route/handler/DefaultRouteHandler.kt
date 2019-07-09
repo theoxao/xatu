@@ -78,9 +78,9 @@ class DefaultRouteHandler(
                     call.respond(
                         when (result) {
                             is Unit -> throw RuntimeException("script should not return unit")
-                            is CompletableFuture<*> -> result.await()
-                            is Mono<*> -> result.toFuture().await()
-                            is Flux<*> -> result.toMono().toFuture().await()
+                            is CompletableFuture<*> -> result.nestedAwait()
+                            is Mono<*> -> result.toFuture().nestedAwait()
+                            is Flux<*> -> result.toMono().toFuture().nestedAwait()
                             null -> "null"
                             else -> result
                         }
@@ -89,6 +89,15 @@ class DefaultRouteHandler(
             }
         }
     }
+
+    suspend fun CompletableFuture<*>.nestedAwait(): Any {
+        val await = this.await()
+        if (await is CompletableFuture<*>) {
+            return await.nestedAwait()
+        }
+        return await
+    }
+
 
     override fun removeRoute(id: String) {
         baseRoute?.childList()!!.forEach { parent ->
