@@ -1,0 +1,58 @@
+{
+  "name": "startbootstrap-sb-admin-2",
+  "homepage": "http://startbootstrap.com/template-overviews/sb-admin-2/",
+  "version": "3.3.7+1",
+  "authors": [
+    "David Miller"
+  ],
+  "description": "A free, open source, Bootstrap admin theme created by Start Bootstrap",
+  "keywords": [
+    "bootstrap",
+    "theme"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    "pages",
+    "index.html",
+    "/js"
+  ],
+  "main": [
+    "dist/css/main.css",
+    "dist/js/main.js"
+  ],
+  "dependencies": {
+    "bootstrap": "~3.3.7",
+    "datatables": "~1.10.13",
+    "datatables-plugins": "~1.0.1",
+    "flot": "~0.8.3",
+    "font-awesome": "~4.7",
+    "holderjs": "~2.4.1",
+    "morrisjs": "~0.5.1",
+    "datatables-responsive": "1.0.6",
+    "flot.tooltip": "~0.8.4",
+    "bootstrap-datepicker": "~1.6.4",
+    "prismjs": "~1.6.0",
+    "html5shiv": "~3.7.3",
+    "Respond": "~1.4.2",
+    "eonasdan-bootstrap-datetimepicker": "^4.17.47",
+    "moment": "momentjs#^2.18.1",
+    "chartjs": "chart.js#^2.6.0",
+    "tinymce": "4.6.6",
+    "clipboard": "1.7.1",
+    "toastr": "2.1.2",
+    "handlebars": "4.0.10",
+    "handlebars-helpers": "2.0.0",
+    "blueimp-md5": "2.10.0",
+    "spectrum": "1.8.0",
+    "echarts": "^4.0.4",
+    "jsdiff": "3.4.0"
+  },
+  "resolutions": {
+    "font-awesome": "~4.7"
+  }
+}

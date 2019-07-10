@@ -1,0 +1,108 @@
+.promotion-modal {
+  .modal-content {
+    background-color: #2E363F;
+    color: white;
+  }
+
+  .chapter-content {
+    font-size: 16px;
+
+    p {
+      text-indent: 2em;
+    }
+  }
+}
+
+.promotion {
+  .book-info {
+    .cover-wrapper {
+      margin: 0 auto;
+      width: 225px;
+      max-height: 300px;
+      overflow: hidden;
+      box-shadow: 0 0 0.8em #484a4b;
+    }
+
+    img {
+      width: 100%;
+      height: auto;
+    }
+
+    p {
+      overflow: hidden;
+      word-break: break-all;
+    }
+  }
+
+  .chapter-list {
+    $border-color: $legend-border-color;
+
+    #chapterMore {
+      @extend .link;
+      text-align: center;
+      border: 1px solid $border-color;
+      border-top: 0;
+      padding: 15px;
+    }
+
+    ul, li {
+      list-style: none;
+    }
+
+    ul {
+      margin: 0;
+      padding: 0;
+      border: 1px solid $border-color;
+
+      &:nth-of-type(2) {
+        border-top: 0;
+      }
+    }
+
+    li {
+      padding: 10px 15px;
+      font-size: 16px;
+
+      em {
+        font-style: normal;
+        padding-right: 5px;
+      }
+
+      border-bottom: 1px solid $border-color;
+
+      &:last-child {
+        border-bottom: 0;
+      }
+
+      i {
+        margin-left: 5px;
+        font-size: 0.7em;
+        font-style: normal;
+      }
+
+      .chapter-free {
+        color: #018d0d;
+      }
+
+      .chapter-vip {
+        span {
+          margin-right: 2px;
+        }
+
+        color: #fe4a03;
+      }
+
+      .action-link {
+        float: right;
+
+        span {
+          margin-right: 5px;
+        }
+      }
+
+      .chapter-name {
+        @extend .link;
+      }
+    }
+  }
+}

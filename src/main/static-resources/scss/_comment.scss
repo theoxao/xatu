@@ -1,0 +1,124 @@
+.comment-grid {
+  $comment-poster-height: 50px;
+  $comment-left-offset: $comment-poster-height + 20px;
+
+  .comment-header {
+    height: $comment-poster-height;
+    font-size: $font-size-small;
+
+    div {
+      float: left;
+      width: $comment-poster-height;
+      height: $comment-poster-height;
+      overflow: hidden;
+      border-radius: $comment-poster-height/2;
+
+      img {
+        width: 100%;
+        height: 100%;
+      }
+    }
+
+    p {
+      margin-bottom: 0;
+      line-height: 1.5em;
+      padding-left: $comment-left-offset;
+
+      em {
+        color: #666;
+      }
+    }
+
+    .comment-chapter {
+      color: $code-color;
+    }
+  }
+
+  .comment-content {
+    padding: 10px 0 10px $comment-left-offset;
+  }
+
+  .comment-replies, .comment-action {
+    padding-left: $comment-left-offset;
+  }
+
+  .comment-reply {
+    padding: 10px 0;
+    border-bottom: 1px dotted $gray-light;
+
+    &:last-child {
+      border-bottom: 0;
+    }
+
+    $reply-poster-height: 20px;
+    $reply-left-offset: $reply-poster-height + 5px;
+
+    .comment-reply-header {
+      height: $reply-poster-height;
+      font-size: $font-size-small;
+
+      div {
+        float: left;
+        width: $reply-poster-height;
+        height: $reply-poster-height;
+        overflow: hidden;
+        border-radius: $reply-poster-height/2;
+
+        img {
+          width: 100%;
+          height: 100%;
+        }
+      }
+
+      > p {
+        margin-left: $reply-left-offset;
+      }
+    }
+
+    .comment-reply-content {
+      //margin-left: $reply-left-offset;
+    }
+  }
+
+  .comment-reply-form {
+    width: 350px;
+
+    textarea {
+      width: 100%;
+      height: 80px;
+      margin: 5px 0;
+    }
+
+    > div {
+      text-align: right;
+    }
+  }
+
+  .comment-reply-header, .comment-poster {
+    button {
+      margin-left: 8px;
+    }
+  }
+
+  .post-content.trashed, .comment-content.trashed {
+    text-decoration: line-through;
+    color: darkred;
+  }
+}
+
+#comment-form {
+  margin-bottom: 10px;
+
+  textarea {
+    @media(min-width: 768px) {
+      width: 450px;
+      float: left;
+      margin-right: 10px;
+    }
+    height: 80px;
+  }
+}
+
+.poster-name {
+  color: $brand-secondary;
+}
