@@ -2,6 +2,7 @@ package com.theoxao.test
 
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.mapping.Document
+import java.util.concurrent.CompletableFuture
 
 
 /**
@@ -25,5 +26,9 @@ class App {
 
     override fun toString(): String {
         return this.id.toHexString() + this.name + this.desc
+    }
+
+    fun future(): CompletableFuture<String> {
+        return CompletableFuture.completedFuture("this is a message from future")
     }
 }

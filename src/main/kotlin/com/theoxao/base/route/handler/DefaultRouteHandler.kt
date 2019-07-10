@@ -21,7 +21,6 @@ import io.ktor.util.pipeline.ContextDsl
 import kotlinx.coroutines.future.await
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import org.springframework.transaction.PlatformTransactionManager
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.publisher.toMono
@@ -38,8 +37,7 @@ import kotlin.reflect.jvm.javaField
 class DefaultRouteHandler(
     private val applicationEngine: ApplicationEngine,
     private val scriptService: GroovyScriptService,
-    private val routeCacheService: RouteCacheService,
-    private val transactionManager: PlatformTransactionManager
+    private val routeCacheService: RouteCacheService
 ) : RouteHandler {
 
     private val log = LoggerFactory.getLogger(this::class.java.name)
@@ -80,9 +78,9 @@ class DefaultRouteHandler(
                     call.respond(
                         when (result) {
                             is Unit -> throw RuntimeException("script should not return unit")
-                            is CompletableFuture<*> -> result.await()
-                            is Mono<*> -> result.toFuture().await()
-                            is Flux<*> -> result.toMono().toFuture().await()
+                            is CompletableFuture<*> -> result.nestedAwait()
+                            is Mono<*> -> result.toFuture().nestedAwait()
+                            is Flux<*> -> result.toMono().toFuture().nestedAwait()
                             null -> "null"
                             else -> result
                         }
@@ -91,6 +89,15 @@ class DefaultRouteHandler(
             }
         }
     }
+
+    suspend fun CompletableFuture<*>.nestedAwait(): Any {
+        val await = this.await()
+        if (await is CompletableFuture<*>) {
+            return await.nestedAwait()
+        }
+        return await
+    }
+
 
     override fun removeRoute(id: String) {
         baseRoute?.childList()!!.forEach { parent ->

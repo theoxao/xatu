@@ -1,6 +1,7 @@
 package com.theoxao.base.script
 
 import com.theoxao.base.common.GroovyShellHolder
+import com.theoxao.base.common.SyntaxType
 import com.theoxao.base.persist.repository.ScriptRepository
 import com.theoxao.base.script.ast.ApiASTTransform.Companion.API_META_FIELD_NAME
 import com.theoxao.base.script.ast.ApiASTTransform.Companion.API_META_OBJECT_NAME
@@ -58,7 +59,10 @@ class GroovyScriptService(
         return script.invokeMethod(methodName, param)
     }
 
-    fun preParse(rawScript: String): String = TODO()
+    fun preParse(rawScript: String, type: SyntaxType): String {
+        val bean = applicationContext.getBean(type.preParser ?: throw RuntimeException("pre-parser not found"))
+        return bean.preParse(rawScript)
+    }
 
     fun findScriptById(id: String) = scriptRepository.findById(id) ?: throw RuntimeException("script not found")
 }
