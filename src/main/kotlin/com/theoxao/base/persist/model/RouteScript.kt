@@ -9,13 +9,18 @@ import org.springframework.data.mongodb.core.mapping.Document
  * @author theo
  * @date 2019/6/19
  */
-@Document("route_script")
-open class RouteScript : ScriptModel() {
-    @Id
-    var id = ""
+open class RouteScript {
+
+    var id: String = ""
 
     var uri = "/"
 
     var requestMethod = "GET"
+
+    var content: String? = null
+
+    var methodName = "service"
+
+    var app = "system"
 
 }

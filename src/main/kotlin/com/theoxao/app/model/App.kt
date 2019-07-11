@@ -1,5 +1,6 @@
-package com.theoxao.test
+package com.theoxao.app.model
 
+import com.theoxao.app.model.dto.AppDTO
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.mapping.Document
 import java.util.concurrent.CompletableFuture
@@ -17,18 +18,22 @@ class App {
 
     var desc: String? = null
 
-    constructor(name: String, desc: String?) {
+    var image: String? = null
+
+    constructor(name: String, desc: String?, image: String?) {
         this.name = name
         this.desc = desc
+        this.image = image
     }
 
     constructor()
 
-    override fun toString(): String {
-        return this.id.toHexString() + this.name + this.desc
-    }
-
-    fun future(): CompletableFuture<String> {
-        return CompletableFuture.completedFuture("this is a message from future")
+    fun dto(): AppDTO {
+        val dto = AppDTO()
+        dto.id = id.toHexString()
+        dto.name = this.name
+        dto.desc = this.desc
+        dto.image = this.image
+        return dto
     }
 }

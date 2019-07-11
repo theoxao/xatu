@@ -26,8 +26,7 @@ import java.util.concurrent.CompletableFuture
  * @author theo
  * @date 2019/6/25
  */
-@SpringBootApplication
-@EnableConfigurationProperties
+@SpringBootApplication(scanBasePackages = ["com.theoxao"])
 open class Application {
 
 

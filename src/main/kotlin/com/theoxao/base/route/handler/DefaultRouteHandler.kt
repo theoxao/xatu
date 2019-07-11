@@ -90,7 +90,7 @@ class DefaultRouteHandler(
         }
     }
 
-    suspend fun CompletableFuture<*>.nestedAwait(): Any {
+    private suspend fun CompletableFuture<*>.nestedAwait(): Any {
         val await = this.await()
         if (await is CompletableFuture<*>) {
             return await.nestedAwait()
