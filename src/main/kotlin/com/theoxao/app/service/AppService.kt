@@ -2,8 +2,8 @@ package com.theoxao.app.service
 
 import com.theoxao.app.model.App
 import com.theoxao.app.model.dto.AppDTO
-import com.theoxao.common.RestResponse
-import com.theoxao.common.withData
+import com.theoxao.common.RestResponse.RestResponse
+import com.theoxao.common.RestResponse.withData
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria

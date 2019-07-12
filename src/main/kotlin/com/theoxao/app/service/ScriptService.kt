@@ -6,8 +6,8 @@ import com.theoxao.app.model.dto.TriggerDTO
 import com.theoxao.app.model.vo.RouteScriptVO
 import com.theoxao.base.persist.model.ScriptModel
 import com.theoxao.base.persist.model.Trigger
-import com.theoxao.common.RestResponse
-import com.theoxao.common.withData
+import com.theoxao.common.RestResponse.RestResponse
+import com.theoxao.common.RestResponse.withData
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria

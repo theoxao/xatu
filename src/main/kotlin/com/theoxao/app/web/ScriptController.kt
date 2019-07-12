@@ -5,7 +5,7 @@ import com.theoxao.app.model.dto.ScriptDTO
 import com.theoxao.app.model.vo.RouteScriptVO
 import com.theoxao.app.service.ScriptService
 import com.theoxao.base.common.Constant
-import com.theoxao.common.RestResponse
+import com.theoxao.common.RestResponse.RestResponse
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping

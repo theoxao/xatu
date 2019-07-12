@@ -3,7 +3,7 @@ package com.theoxao.app.web
 import com.theoxao.app.model.App
 import com.theoxao.app.model.dto.AppDTO
 import com.theoxao.app.service.AppService
-import com.theoxao.common.RestResponse
+import com.theoxao.common.RestResponse.RestResponse
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
