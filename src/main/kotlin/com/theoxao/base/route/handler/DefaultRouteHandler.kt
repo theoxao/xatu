@@ -8,6 +8,7 @@ import com.theoxao.base.script.ScriptParamNameDiscoverer
 import com.theoxao.base.script.ast.ApiASTTransform.Companion.API_META_OBJECT_NAME
 import com.theoxao.base.script.ast.MetaApi
 import com.theoxao.configuration.handlerParam
+import groovy.lang.MissingPropertyException
 import io.ktor.application.call
 import io.ktor.http.HttpMethod
 import io.ktor.locations.KtorExperimentalLocationsAPI
@@ -56,7 +57,12 @@ class DefaultRouteHandler(
         val script = scriptService.parseAndAutowire(routeScript.content!!)
         script ?: return
         applicationEngine.application.routing {
-            val metaApi = script.getProperty(API_META_OBJECT_NAME) as? MetaApi
+            var metaApi: MetaApi? = null
+            try {
+                metaApi = script.getProperty(API_META_OBJECT_NAME) as? MetaApi
+            } catch (e: MissingPropertyException) {
+
+            }
             var uri = routeScript.uri
             var requestMethod = routeScript.requestMethod
             var methodName = routeScript.methodName

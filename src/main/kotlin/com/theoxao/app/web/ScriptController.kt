@@ -27,7 +27,7 @@ class ScriptController(private val scriptService: ScriptService, private val red
     @RequestMapping("/add")
     fun addRouteScript(@RequestBody vo: RouteScriptVO): RestResponse<Unit> {
         val script = scriptService.add(vo)
-        redisTemplate.boundValueOps(Constant.ROUTE_DATA_REDIS_PREFIX + script.id.toHexString())
+        redisTemplate.boundValueOps(Constant.ROUTE_DATA_REDIS_PREFIX + script.id)
             .set(objectMapper.writeValueAsString(script))
         return RestResponse.ok()
     }

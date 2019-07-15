@@ -14,14 +14,14 @@ class ScriptDTO {
 
     var triggerId: String? = null
 
-    var trigger: TriggerDTO? = null
+    var trigger: RouteTriggerDTO? = null
 
 
     companion object {
         fun fromEntity(scriptModel: ScriptModel?): ScriptDTO? {
             scriptModel ?: return null
             val dto = ScriptDTO()
-            dto.id = scriptModel.id.toHexString()
+            dto.id = scriptModel.id
             dto.content = scriptModel.content
             dto.app = scriptModel.app
             dto.triggerId = scriptModel.triggerId

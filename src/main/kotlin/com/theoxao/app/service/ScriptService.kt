@@ -2,7 +2,7 @@ package com.theoxao.app.service
 
 import com.theoxao.app.model.RouteTrigger
 import com.theoxao.app.model.dto.ScriptDTO
-import com.theoxao.app.model.dto.TriggerDTO
+import com.theoxao.app.model.dto.RouteTriggerDTO
 import com.theoxao.app.model.vo.RouteScriptVO
 import com.theoxao.base.persist.model.ScriptModel
 import com.theoxao.base.persist.model.Trigger
@@ -23,7 +23,8 @@ open class ScriptService(private val mongoTemplate: MongoTemplate) {
             .map { ScriptDTO.fromEntity(it) }
         scripts.forEach {
             it?.let {
-                it.trigger = TriggerDTO.fromEntity(mongoTemplate.findById(ObjectId(it.triggerId), Trigger::class.java))
+                it.trigger =
+                    RouteTriggerDTO.fromEntity(mongoTemplate.findById(ObjectId(it.triggerId), Trigger::class.java))
             }
         }
         return RestResponse.ok<List<ScriptDTO?>>().withData(scripts)

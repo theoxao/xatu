@@ -74,7 +74,16 @@ compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
 
+mainClasses{
+    
+}
 jar {
     baseName = 'immanual'
-    version =  '1.0-SNAPSHOT'
+    version = '1.0-SNAPSHOT'
+    manifest {
+        attributes(
+                'Class-Path': configurations.compile.collect { it.getName() }.join(' '),
+                'Main-Class': 'com.theoxao.Application'
+        )
+    }
 }

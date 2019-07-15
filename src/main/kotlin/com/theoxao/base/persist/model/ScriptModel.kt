@@ -12,7 +12,7 @@ import org.springframework.data.mongodb.core.mapping.Document
 @Document("script")
 open class ScriptModel {
 
-    var id: ObjectId = ObjectId()
+    var id: String = ObjectId().toHexString()
 
     var content: String? = null
 
