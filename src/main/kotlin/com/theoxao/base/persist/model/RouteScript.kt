@@ -21,6 +21,6 @@ open class RouteScript {
 
     var methodName = "service"
 
-    var app = "system"
+    var app: String? = "system"
 
 }
