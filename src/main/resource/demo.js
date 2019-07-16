@@ -1,6 +1,7 @@
+import appService from "com.theoxao.app.service.AppService";
 function add() {
     console.log("thou art entering add method");
-    return "voila add methode";
+    return appService.list();
 }
 
 var result = add();
