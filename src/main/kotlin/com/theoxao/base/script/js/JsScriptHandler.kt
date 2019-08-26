@@ -1,15 +1,23 @@
 package com.theoxao.base.script.js
 
+import org.graalvm.polyglot.Context
+import org.springframework.stereotype.Component
+
 
 /**
  * create by theoxao on 2019/7/7
  */
-//@Component
+@Component
 class JsScriptHandler {
-//    val jsContext: Context = Context.create("js")
+    val jsContext: Context = Context.create("js")
 
 
-//    fun function(js: JsScript): Any? {
-//        return jsContext.eval("js", js.content)
-//    }
+    fun function(js: JsScript): Any? {
+        return jsContext.eval("js", js.content)
+    }
+
+    fun bind(name: String, binders: Any?) {
+        val bindings = jsContext.getBindings("js")
+        bindings.putMember(name, binders)
+    }
 }

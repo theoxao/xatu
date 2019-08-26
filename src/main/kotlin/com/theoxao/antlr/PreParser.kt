@@ -6,6 +6,5 @@ package com.theoxao.antlr
  */
 interface PreParser {
 
-
     fun preParse(text: String): String
 }

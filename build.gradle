@@ -73,6 +73,6 @@ compileTestKotlin {
 }
 
 jar {
-    baseName = 'immanual'
+    baseName = 'xatu'
     version =  '1.0-SNAPSHOT'
 }
